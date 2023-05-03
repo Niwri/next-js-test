@@ -24,11 +24,14 @@ function Message() {
     const [submitStatus, setSubmitStatus] = useState(0);
     const [submitMessage, setSubmitMessage] = useState("");
 
+    const [submitButton, setSubmitButton] = useState('Submit');
+
     var data = require('../data/info.json');
 
     {/* Submit event. Toggles the submission div on via submitSuccess */}
     const handleSubmit = async (event) => {
         setSubmitStatus(0);
+        setSubmitButton('Loading...');
 
         event.preventDefault();
 
@@ -68,6 +71,8 @@ function Message() {
             console.log("Error: ", err);
             setSubmitStatus(2);
         }
+
+        setSubmitButton("Submit");
 
 
     }
@@ -157,7 +162,7 @@ function Message() {
                     </div>
 
                     {/* Submit Button */}
-                    <button className="bg-slate-600 w-fit mx-auto px-3 py-1 rounded-full text-bold text-slate-400 hover:text-slate-300 duration-200 hover:bg-slate-800" type="submit">Submit</button>
+                    <button className="bg-slate-600 w-fit mx-auto px-3 py-1 rounded-full text-bold text-slate-400 hover:text-slate-300 duration-200 hover:bg-slate-800" type="submit">{submitButton}</button>
 
                  </form>
 
