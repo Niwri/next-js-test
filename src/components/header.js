@@ -12,7 +12,7 @@ function Header() {
     var data = require('../data/info.json');
 
     return( 
-        <div>
+        <div className="relative z-50">
         <header className="bg-slate-800 p-5 mb-10">
             <h1 className="text-xl font-mono text-center">{data.name}'s Personal Website</h1>
         </header>

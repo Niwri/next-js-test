@@ -5,8 +5,10 @@ import axios from "axios"
 
 function SubmissionStatusBox(props) {
     return(
-        <div className="w-fit mx-auto bg-slate-900 px-8 py-3 rounded-3xl hover:-translate-y-1 duration-200 mb-10">
-            {props.children}
+        <div className="absolute h-[100%] w-full left-0 top-0 bg-[#000000AA] flex flex-col justify-center z-5">
+            <div className="mx-auto h-fit w-fit transform bg-slate-900 px-8 py-3 rounded-3xl hover:scale-[102%] duration-200 mb-10">
+                {props.children}
+            </div>
         </div>
     )
 }
@@ -24,14 +26,14 @@ function Message() {
     const [submitStatus, setSubmitStatus] = useState(0);
     const [submitMessage, setSubmitMessage] = useState("");
 
-    const [submitButton, setSubmitButton] = useState('Submit');
+    const [enableSubmit, setEnableSubmit] = useState(true);
 
     var data = require('../data/info.json');
 
     {/* Submit event. Toggles the submission div on via submitSuccess */}
     const handleSubmit = async (event) => {
         setSubmitStatus(0);
-        setSubmitButton('Loading...');
+        setEnableSubmit(false);
 
         event.preventDefault();
 
@@ -72,7 +74,7 @@ function Message() {
             setSubmitStatus(2);
         }
 
-        setSubmitButton("Submit");
+        setEnableSubmit(true);
 
 
     }
@@ -129,49 +131,51 @@ function Message() {
     }
 
     return(
-        <div>
-            <Header/>
-
-            <div className="w-1/2 max-w-2xl m-auto">
+            <div>
                 
-                <div className="mt-20 mb-10 relative -left-20">
-                    <Button text="Back" link="/"/>
+                <Header/>
+
+                <div className="relative w-1/2 max-w-2xl m-auto">
+                    
+                    <div className="mt-20 mb-10 relative -left-20 z-0">
+                        <Button text="Back" link="/"/>
+                    </div>
+
+                    <h1 className="font-mono text-start text-2xl mb-5">&gt; Send a Message</h1>
+
+                    {/* The Message Form, using handleSubmit function */}
+                    <form className="flex flex-col w-3/4 mx-auto space-y-10 p-10 rounded-3xl" onSubmit={handleSubmit}>
+
+                        {/* Name */}
+                        <div className="flex flex-col space-y-3">
+                            <label className="my-auto text-bold">—Name—</label>
+                            <input id="name" className="rounded-full px-3 py-1 text-black" ref={nameInput} type="text" placeholder="Enter name here..."/>
+                        </div>
+
+                        {/* Phone Number */}
+                        <div className="flex flex-col space-y-3">
+                            <label className="my-auto text-bold">—Phone number—</label>
+                            <input id="number" className="rounded-full px-3 py-1 text-black" ref={numberInput} type="text" placeholder="Enter number here..."/>
+                        </div>
+
+                        {/* Message Content */}
+                        <div className="flex flex-col space-y-3">
+                            <label className="my-auto text-bold">—Message—</label>
+                            <input id="message" className="rounded-full px-3 py-1 text-black" ref={messageInput} type="text" placeholder="Enter message here..."/>
+                        </div>
+
+                        {/* Submit Button */}
+                        {enableSubmit ? <button className="bg-slate-600 w-fit mx-auto px-3 py-1 rounded-full text-bold text-slate-400 hover:text-slate-300 duration-200 hover:bg-slate-800" type="submit">Submit</button>
+                        : <span className="cursor-not-allowed bg-slate-600 w-fit mx-auto px-3 py-1 rounded-full text-bold text-slate-400 opacity-50" type="submit">Loading...</span> }
+
+                    </form>
+
                 </div>
-
-                <h1 className="font-mono text-start text-2xl mb-5">&gt; Send a Message</h1>
-
-                {/* The Message Form, using handleSubmit function */}
-                <form className="flex flex-col w-3/4 mx-auto space-y-10 p-10 rounded-3xl" onSubmit={handleSubmit}>
-
-                    {/* Name */}
-                    <div className="flex flex-col space-y-3">
-                        <label className="my-auto text-bold">—Name—</label>
-                        <input id="name" className="rounded-full px-3 py-1 text-black" ref={nameInput} type="text" placeholder="Enter name here..."/>
-                    </div>
-
-                    {/* Phone Number */}
-                    <div className="flex flex-col space-y-3">
-                        <label className="my-auto text-bold">—Phone number—</label>
-                        <input id="number" className="rounded-full px-3 py-1 text-black" ref={numberInput} type="text" placeholder="Enter number here..."/>
-                    </div>
-
-                    {/* Message Content */}
-                    <div className="flex flex-col space-y-3">
-                        <label className="my-auto text-bold">—Message—</label>
-                        <input id="message" className="rounded-full px-3 py-1 text-black" ref={messageInput} type="text" placeholder="Enter message here..."/>
-                    </div>
-
-                    {/* Submit Button */}
-                    <button className="bg-slate-600 w-fit mx-auto px-3 py-1 rounded-full text-bold text-slate-400 hover:text-slate-300 duration-200 hover:bg-slate-800" type="submit">{submitButton}</button>
-
-                 </form>
 
                 {/* Submit response box */}
                 {SubmissionStatus(submitStatus)}
 
             </div>
-
-        </div>
     )
 }
 
