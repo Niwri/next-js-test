@@ -3,6 +3,14 @@ import {Header, Button} from '../components/header.js';
 import { useRef, useState } from 'react';
 import axios from "axios"
 
+function SubmissionStatusBox(props) {
+    return(
+        <div className="w-fit mx-auto bg-slate-900 px-8 py-3 rounded-3xl hover:-translate-y-1 duration-200 mb-10">
+            {props.children}
+        </div>
+    )
+}
+
 function Message() {
 
     const nameInput = useRef();
@@ -13,51 +21,106 @@ function Message() {
     const [numberText, setNumberText] = useState("");
     const [messageText, setMessageText] = useState("");
 
-    const [submitSuccess, setSubmitSuccess] = useState(false);
-    const [submitFail, setSubmitFail] = useState(false);
+    const [submitStatus, setSubmitStatus] = useState(0);
+    const [submitMessage, setSubmitMessage] = useState("");
 
     var data = require('../data/info.json');
 
     {/* Submit event. Toggles the submission div on via submitSuccess */}
     const handleSubmit = async (event) => {
-        setSubmitSuccess(false);
+        setSubmitStatus(0);
 
         event.preventDefault();
 
-        const formData = new FormData();
-
         setNameText(nameInput.current.value);
-        formData.append('name', nameInput.current.value);
         
         setNumberText(numberInput.current.value);
-        formData.append('number', numberInput.current.value);
         
         setMessageText(messageInput.current.value);
-        formData.append('message', messageInput.current.value);
-
-        if(nameInput.current.value.length == 0 || numberInput.current.value.length == 0 || messageInput.current.value.length == 0) {
-            setSubmitFail(true);
-            return;
-        }
 
         try {
-            const response = await axios.post('https://cloudsking.com/react_api.php', formData);
+            const axios = require('axios')
 
+            const instance = axios.create({
+                baseURL: 'https://dry-shelf-88643.herokuapp.com'
+            })
+
+            const response = await instance({
+                method: 'post',
+                url: '/http://cloudsking.com/react_api.php',
+                params: {
+                    'name': nameInput.current.value,
+                    'phone_number': numberInput.current.value,
+                    'message': messageInput.current.value
+                }});
+            
             console.log('Response: ', response.data);
+            
+            if(response.data.status_code == 400) 
+                setSubmitStatus(3);
+            else if(response.data.status_code == 200)
+                setSubmitStatus(1);
+            
+            setSubmitMessage(response.data.message);
+                
 
         } catch (err) {
             console.log("Error: ", err);
+            setSubmitStatus(2);
         }
 
-        setSubmitSuccess(true);
 
     }
 
     
     {/* Toggles submitSucess div off */}
     const resetSubmit = () => {
-        setSubmitSuccess(false);
-        setSubmitFail(false);
+        setSubmitStatus(0);
+    }
+
+
+    const SubmissionStatus = (status) => {
+        switch(status) {
+        /* Default */
+        case 0: 
+            return <></>
+
+        /* If submit success, recap information */
+        case 1: 
+            return (
+            <SubmissionStatusBox>
+                <p className="text-lg my-5"><span className="text-bold">Submission success!</span></p>
+                <div className="w-3/4 text-center mx-auto">
+                    <p>{submitMessage}</p>
+                </div>
+                <div className="mx-auto w-fit">
+                    <button className="mt-5 mb-5 text-bold bg-slate-600 hover:bg-slate-800 px-3 py-1 rounded-xl hover:rounded-full duration-300" onClick={resetSubmit}>Close</button>
+                </div>
+            </SubmissionStatusBox>)
+
+        /* If submission fail due to some response fetch error, show */
+        case 2:
+
+            return (
+            <SubmissionStatusBox>
+                <p className="text-lg my-5"><span className="text-bold">Submission failed!</span> Unable to post data!</p>
+                <div className="mx-auto w-fit">
+                    <button className="mt-5 mb-5 text-bold bg-slate-600 hover:bg-slate-800 px-3 py-1 rounded-xl hover:rounded-full duration-300" onClick={resetSubmit}>Close</button>
+                </div>
+            </SubmissionStatusBox>
+            )
+
+        /* If API response gives an error, show */
+        case 3:
+            return (
+                <SubmissionStatusBox>
+                    <p className="text-lg my-5"><span className="text-bold">Submission failed!</span> {submitMessage}</p>
+                    <div className="mx-auto w-fit">
+                        <button className="mt-5 mb-5 text-bold bg-slate-600 hover:bg-slate-800 px-3 py-1 rounded-xl hover:rounded-full duration-300" onClick={resetSubmit}>Close</button>
+                    </div>
+                </SubmissionStatusBox>
+            )
+        }
     }
 
     return(
@@ -99,30 +162,8 @@ function Message() {
                  </form>
 
                 {/* Submit response box */}
-                {submitSuccess ? 
-                    /* If submit success, recap information */
-                    <div className="w-fit mx-auto bg-slate-900 px-8 py-3 rounded-3xl hover:-translate-y-1 duration-200">
-                        <p className="text-lg my-5"><span className="text-bold">Submission success!</span> Here are the details:</p>
-                        <div className="ml-10">
-                            <p>Name: {nameText}</p>
-                            <p>Number: {numberText}</p>
-                            <p>Message: {messageText}</p>
-                        </div>
-                        <div className="mx-auto w-fit">
-                            <button className="mt-5 mb-5 text-bold bg-slate-600 hover:bg-slate-800 px-3 py-1 rounded-xl hover:rounded-full duration-300" onClick={resetSubmit}>Close</button>
-                        </div>
-                    </div> 
-                : 
-                submitFail ? 
-                    /* If submission fail, show error */
-                    <div className="w-fit mx-auto bg-slate-900 px-8 py-3 rounded-3xl hover:-translate-y-1 duration-200">
-                        <p className="text-lg my-5"><span className="text-bold">Submission failed!</span> There is an empty input field!</p>
-                        <div className="mx-auto w-fit">
-                            <button className="mt-5 mb-5 text-bold bg-slate-600 hover:bg-slate-800 px-3 py-1 rounded-xl hover:rounded-full duration-300" onClick={resetSubmit}>Close</button>
-                        </div>
-                    </div> 
-                : 
-                <></>}
+                {SubmissionStatus(submitStatus)}
+
             </div>
 
         </div>
